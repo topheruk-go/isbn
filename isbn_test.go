@@ -43,84 +43,84 @@ func TestIsbnValidation(t *testing.T) {
 	}
 }
 
-// func TestIsbnJSON(t *testing.T) {
-// 	data := `["9780716703440","0716703440"]`
+func TestIsbnJSON(t *testing.T) {
+	data := `["9780716703440","0716703440"]`
 
-// 	var isbns []ISBN
-// 	err := json.NewDecoder(strings.NewReader(data)).Decode(&isbns)
-// 	assert.NilError(t, err)
+	var isbns []ISBN
+	err := json.NewDecoder(strings.NewReader(data)).Decode(&isbns)
+	assert.NilError(t, err)
 
-// 	var buf bytes.Buffer
-// 	assert.NilError(t, json.NewEncoder(&buf).Encode(&isbns[1]))
+	var buf bytes.Buffer
+	assert.NilError(t, json.NewEncoder(&buf).Encode(&isbns[1]))
 
-// 	// cant think of a better way to test this
-// 	assert.Equal(t, len(buf.String()), len("9780716703440")+1)
-// }
+	// cant think of a better way to test this
+	assert.Equal(t, len(buf.String()), len("9780716703440")+1)
+}
 
-// func TestIsbnSql(t *testing.T) {
-// 	isbn, _ := Parse("9780716703440")
+func TestIsbnSql(t *testing.T) {
+	isbn, _ := Parse("9780716703440")
 
-// 	db, _ := sql.Open("sqlite3", ":memory:")
+	db, _ := sql.Open("sqlite3", ":memory:")
 
-// 	type testcase struct {
-// 		ID   int
-// 		Isbn *ISBN // nullable
-// 	}
+	type testcase struct {
+		ID   int
+		Isbn *ISBN // nullable
+	}
 
-// 	tt := []struct {
-// 		desc   string
-// 		schema string
-// 	}{
-// 		{"isbn as BLOB", "CREATE TABLE foo (id INTEGER PRIMARY KEY, isbn BLOB)"},
-// 		{"isbn as TEXT", "CREATE TABLE foo (id INTEGER PRIMARY KEY, isbn TEXT)"},
-// 	}
-// 	for _, tc := range tt {
-// 		t.Run(tc.desc, func(t *testing.T) {
-// 			_, err := db.Exec(tc.schema)
-// 			assert.NilError(t, err)
+	tt := []struct {
+		desc   string
+		schema string
+	}{
+		{"isbn as BLOB", "CREATE TABLE foo (id INTEGER PRIMARY KEY, isbn BLOB)"},
+		{"isbn as TEXT", "CREATE TABLE foo (id INTEGER PRIMARY KEY, isbn TEXT)"},
+	}
+	for _, tc := range tt {
+		t.Run(tc.desc, func(t *testing.T) {
+			_, err := db.Exec(tc.schema)
+			assert.NilError(t, err)
 
-// 			_, err = db.Exec(`INSERT INTO foo (isbn) VALUES ($1)`, isbn)
-// 			assert.NilError(t, err)
+			_, err = db.Exec(`INSERT INTO foo (isbn) VALUES ($1)`, isbn)
+			assert.NilError(t, err)
 
-// 			var tc testcase
-// 			assert.NilError(t, db.QueryRow(`SELECT id, isbn FROM foo WHERE id = 1`).Scan(&tc.ID, &tc.Isbn))
-// 			assert.Equal(t, tc.Isbn.String(), isbn.String())
+			var tc testcase
+			assert.NilError(t, db.QueryRow(`SELECT id, isbn FROM foo WHERE id = 1`).Scan(&tc.ID, &tc.Isbn))
+			assert.Equal(t, tc.Isbn.String(), isbn.String())
 
-// 			db.Exec(`DROP TABLE foo`)
-// 		})
-// 	}
-// }
+			db.Exec(`DROP TABLE foo`)
+		})
+	}
+}
 
-// func TestIsbnPsql(t *testing.T) {
-// 	db, err := pgx.Connect(context.Background(), os.ExpandEnv("host=${POSTGRES_HOSTNAME} port=${DB_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable"))
-// 	assert.NilError(t, err)
+func TestIsbnPsql(t *testing.T) {
+	db, err := pgx.Connect(context.Background(), os.ExpandEnv("host=${POSTGRES_HOSTNAME} port=${DB_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable"))
+	assert.NilError(t, err)
 
-// 	isbn, _ := Parse("9780716703440")
-// 	type testcase struct {
-// 		ID    int
-// 		Isbn  *ISBN     // nullable
-// 		Title *[13]byte // nullable
-// 	}
+	isbn, _ := Parse("9780716703440")
+	type testcase struct {
+		ID    int
+		Isbn  *ISBN     // nullable
+		Title *[13]byte // nullable
+	}
 
-// 	tt := []struct {
-// 		desc   string
-// 		schema string
-// 	}{
-// 		{"isbn as VARCHAR(13)", "CREATE TEMP TABLE foo (id SERIAL PRIMARY KEY, isbn VARCHAR(13), title VARCHAR(255))"},
-// 	}
-// 	for _, tc := range tt {
-// 		t.Run(tc.desc, func(t *testing.T) {
-// 			_, err := db.Exec(context.Background(), tc.schema)
-// 			assert.NilError(t, err)
+	tt := []struct {
+		desc   string
+		schema string
+	}{
+		{"isbn as VARCHAR(13)", "CREATE TEMP TABLE foo (id SERIAL PRIMARY KEY, isbn VARCHAR(13), title VARCHAR(255))"},
+	}
+	for _, tc := range tt {
+		t.Run(tc.desc, func(t *testing.T) {
+			_, err := db.Exec(context.Background(), tc.schema)
+			assert.NilError(t, err)
 
-// 			_, err = db.Exec(context.Background(), `INSERT INTO foo (isbn) VALUES ($1)`, isbn)
-// 			assert.NilError(t, err)
+			_, err = db.Exec(context.Background(), `INSERT INTO foo (isbn) VALUES ($1)`, isbn)
+			assert.NilError(t, err)
 
-// 			var tc testcase
-// 			assert.NilError(t, db.QueryRow(context.Background(), `SELECT id, isbn, title FROM foo WHERE id = 1`).Scan(&tc.ID, &tc.Isbn, &tc.Title))
-// 			assert.Equal(t, tc.Isbn.String(), isbn.String())
+			var tc testcase
+			assert.NilError(t, db.QueryRow(context.Background(), `SELECT id, isbn, title FROM foo WHERE id = 1`).Scan(&tc.ID, &tc.Isbn, &tc.Title))
+			assert.Equal(t, tc.Isbn.String(), isbn.String())
 
-// 			// db.Exec(context.Background(),`DROP TABLE test`)
-// 		})
-// 	}
-// }
+			// db.Exec(context.Background(),`DROP TABLE test`)
+		})
+	}
+}
